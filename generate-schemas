@@ -18,16 +18,19 @@
 # CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
 # additional information or have any questions.
 
-[ ${#} -ne 2 ] && echo -e "Usage: ${0} /path/towards/eucalyptus/jars /path/to/classcachedir/or/jarofthatdir" && exit 1
+[ ${#} -ne 2 ] && echo -e "Usage: ${0} /path/to/classcachedir/or/jarofthatdir /path/towards/eucalyptus/jars " && exit 1
 TOP=$(readlink -f $(dirname ${0}))
-EUCA=$(readlink -f $(dirname ${1}))
+BINDINGCACHE_CP=$1
+EUCA=$(readlink -f $(dirname ${2}))
 EUCA_CP=$(find ${EUCA} -name \*.jar -exec echo -n :{} \;)
 GEN_CP=$(find ${TOP}/lib -name \*.jar -exec echo -n :{} \;)
-BINDINGCACHE_CP=$2
-CLASSPATH=${GEN_CP/:/}:$2:${EUCA_CP/:/}
+echo Using ${TOP}
+echo Using ${EUCA}
+echo Using ${BINDINGCACHE_CP}
+CLASSPATH=${BINDINGCACHE_CP}${GEN_CP}${EUCA_CP}
 MAIN="groovy.ui.GroovyMain"
 java -classpath ${CLASSPATH} \
--Xmx2g \
+-Xmx4g \
 -Deuca.home=/tmp \
 -Deuca.log.dir=/tmp \
 -Deuca.log.level=DEBUG \
@@ -42,4 +45,4 @@ java -classpath ${CLASSPATH} \
 org.codehaus.groovy.tools.GroovyStarter \
 --main ${MAIN} \
 --conf ${TOP}/lib/groovy-starter.conf \
-${TOP}/lib/generate-xsd.groovy
+${TOP}/lib/generate-xsd.groovy ${BINDINGCACHE_CP}
